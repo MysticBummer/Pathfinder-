@@ -86,12 +86,55 @@
   </section>
 </aside>
 
+<aside id="sound">
+  <section>
+    <h2>Sound</h2>
+    <label class="row">Master <input id="masterVol" type="range" min="0" max="1" step="0.01"></label>
+    <div class="row">
+      <button id="mute" class="small danger" title="M">Mute (M)</button>
+      <button id="stopAll" class="small" title="Fade out all ambience and music">Stop all</button>
+    </div>
+    <input id="soundFilter" type="search" placeholder="Search sounds" class="search">
+  </section>
+
+  <section>
+    <h2>Ambience</h2>
+    <p class="note" id="layersEmpty">Nothing playing. Click sounds below to layer them.</p>
+    <div id="layers"></div>
+    <div id="ambientList" class="pills"></div>
+  </section>
+
+  <section>
+    <h2>Music</h2>
+    <div id="playlists" class="pills"></div>
+    <p class="now" id="nowPlaying"></p>
+    <div class="row">
+      <button id="musicPause" class="small">Pause</button>
+      <button id="musicNext" class="small">Next</button>
+      <button id="musicStop" class="small">Stop</button>
+    </div>
+    <label class="row">Volume <input id="musicVol" type="range" min="0" max="1" step="0.01"></label>
+    <div class="row">
+      <label class="check"><input id="shuffle" type="checkbox"> Shuffle</label>
+      <label>Crossfade <input id="crossfade" type="number" min="0" max="20" step="1"> s</label>
+    </div>
+  </section>
+
+  <section>
+    <h2>Effects</h2>
+    <div id="slots" class="slots"></div>
+    <div class="row"><button id="editKeys" class="small">Change keys</button></div>
+    <label class="row">Volume <input id="sfxVol" type="range" min="0" max="1" step="0.01"></label>
+    <div id="sfxList" class="pills"></div>
+  </section>
+</aside>
+
 <main>
   <div id="banner"></div>
   <canvas id="view"></canvas>
   <div id="help">
     Left drag: use tool · Right drag: look around · Wheel: zoom ·
-    B blackout · Enter show · X reveal/re-fog · [ ] brush size · Ctrl+Z undo · D minis down · arrows move table · Space apply · Esc cancel
+    B blackout · Enter show · X reveal/re-fog · [ ] brush size · Ctrl+Z undo · D minis down · arrows move table · Space apply · Esc cancel · 1-0 effects · M mute · − + volume
   </div>
 </main>
 

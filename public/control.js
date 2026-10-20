@@ -5,6 +5,7 @@ import {
   createFogCanvas, renderFog, applyFogOp, tableScale,
   DEFAULT_PX_PER_INCH, DEFAULT_PX_PER_SQUARE,
 } from './shared.js';
+import { loadSound, refreshSound, handleSoundKey } from './sound.js';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('view');
@@ -124,7 +125,7 @@ async function openCampaign(name) {
   try { localStorage.setItem('campaign', name); } catch {}
   $('campName').textContent = name;
   mapCals = (await api(`campaigns/${encodeURIComponent(name)}/data/maps`)) || {};
-  await refreshMaps();
+  await Promise.all([refreshMaps(), loadSound(name)]);
 }
 
 async function refreshMaps() {
@@ -679,7 +680,10 @@ $('campaign').onchange = (e) => {
   selected = null;
   openCampaign(e.target.value).then(refreshUi);
 };
-$('refresh').onclick = () => refreshMaps();
+$('refresh').onclick = () => {
+  refreshMaps();
+  refreshSound();
+};
 $('openMap').onclick = () => window.open('/map.html', 'table-map', 'popup,width=1280,height=800');
 $('blackout').onclick = () => toggleBlackout();
 document.querySelectorAll('[data-mode]').forEach((b) => (b.onclick = () => setFogMode(b.dataset.mode)));
@@ -754,6 +758,12 @@ addEventListener('keydown', (e) => {
     return;
   }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+  if (handleSoundKey(e)) {
+    e.preventDefault();
+    if (document.activeElement && document.activeElement.tagName === 'BUTTON') document.activeElement.blur();
+    return;
+  }
 
   const step = e.shiftKey ? 5 : 1;
   const arrows = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };

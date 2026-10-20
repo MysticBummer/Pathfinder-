@@ -10,9 +10,11 @@ const PORT = Number(process.env.PORT) || 3210;
 const ROOT = __dirname;
 const PUBLIC_DIR = path.join(ROOT, 'public');
 const CAMPAIGNS_DIR = path.join(ROOT, 'campaigns');
+const LIBRARY_DIR = path.join(ROOT, 'library');
 const SETTINGS_FILE = path.join(ROOT, 'settings.json');
 
 const IMAGE_EXTS = ['.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg'];
+const AUDIO_EXTS = ['.mp3', '.ogg', '.oga', '.opus', '.wav', '.m4a', '.flac', '.webm'];
 
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -30,9 +32,15 @@ const TYPES = {
   '.wav': 'audio/wav',
   '.m4a': 'audio/mp4',
   '.flac': 'audio/flac',
+  '.oga': 'audio/ogg',
+  '.opus': 'audio/ogg',
+  '.webm': 'audio/webm',
 };
 
 fs.mkdirSync(CAMPAIGNS_DIR, { recursive: true });
+for (const sub of ['ambient', 'music', 'sfx']) {
+  fs.mkdirSync(path.join(LIBRARY_DIR, 'audio', sub), { recursive: true });
+}
 
 // Resolve a user-supplied path inside a base folder, or null if it escapes.
 function safeJoin(base, ...parts) {
@@ -50,13 +58,30 @@ function sendJson(res, status, data) {
   send(res, status, JSON.stringify(data), TYPES['.json']);
 }
 
-function sendFile(res, file) {
+function sendFile(req, res, file) {
   fs.stat(file, (err, stat) => {
     if (err || !stat.isFile()) return send(res, 404, 'Not found');
-    res.writeHead(200, {
-      'Content-Type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream',
-      'Content-Length': stat.size,
-    });
+    const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
+    // Audio elements ask for byte ranges so they can seek and loop.
+    const range = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+    if (range && (range[1] || range[2])) {
+      let start = range[1] ? Number(range[1]) : stat.size - Number(range[2]);
+      let end = range[1] && range[2] ? Number(range[2]) : stat.size - 1;
+      start = Math.max(0, start);
+      end = Math.min(end, stat.size - 1);
+      if (start > end) {
+        res.writeHead(416, { 'Content-Range': `bytes */${stat.size}` });
+        return res.end();
+      }
+      res.writeHead(206, {
+        'Content-Type': type,
+        'Content-Length': end - start + 1,
+        'Content-Range': `bytes ${start}-${end}/${stat.size}`,
+        'Accept-Ranges': 'bytes',
+      });
+      return fs.createReadStream(file, { start, end }).pipe(res);
+    }
+    res.writeHead(200, { 'Content-Type': type, 'Content-Length': stat.size, 'Accept-Ranges': 'bytes' });
     fs.createReadStream(file).pipe(res);
   });
 }
@@ -97,6 +122,26 @@ function listFiles(dir, exts, prefix = '', depth = 0) {
     }
   }
   return out.sort((a, b) => a.localeCompare(b));
+}
+
+// Sound files from one audio folder, grouped the way the sound panel uses them.
+// Music subfolders are playlists; loose music files go in a playlist called "Music".
+function listAudio(audioDir, urlPrefix, into) {
+  const url = (rel) => urlPrefix + rel.split('/').map(encodeURIComponent).join('/');
+  const name = (rel) => rel.replace(/\.[^.]+$/, '');
+  for (const rel of listFiles(path.join(audioDir, 'ambient'), AUDIO_EXTS)) {
+    into.ambient.push({ name: name(rel), url: url('ambient/' + rel) });
+  }
+  for (const rel of listFiles(path.join(audioDir, 'sfx'), AUDIO_EXTS)) {
+    into.sfx.push({ name: name(rel), url: url('sfx/' + rel) });
+  }
+  for (const rel of listFiles(path.join(audioDir, 'music'), AUDIO_EXTS)) {
+    const slash = rel.indexOf('/');
+    const list = slash === -1 ? 'Music' : rel.slice(0, slash);
+    const track = slash === -1 ? rel : rel.slice(slash + 1);
+    (into.music[list] = into.music[list] || []).push({ name: name(track), url: url('music/' + rel) });
+  }
+  return into;
 }
 
 function campaignDir(name) {
@@ -166,6 +211,16 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 200, listFiles(path.join(dir, 'maps'), IMAGE_EXTS));
       }
 
+      if (parts[3] === 'audio' && parts.length === 4) {
+        const found = { ambient: [], music: {}, sfx: [] };
+        listAudio(path.join(LIBRARY_DIR, 'audio'), '/library/audio/', found);
+        listAudio(path.join(dir, 'audio'), `/assets/${encodeURIComponent(parts[2])}/audio/`, found);
+        const byName = (a, b) => a.name.localeCompare(b.name);
+        found.ambient.sort(byName);
+        found.sfx.sort(byName);
+        return sendJson(res, 200, found);
+      }
+
       if (parts[3] === 'data' && parts.length === 5) {
         const key = parts[4];
         if (!/^[\w-]{1,200}$/.test(key)) return send(res, 400, 'Bad key');
@@ -182,14 +237,21 @@ const server = http.createServer(async (req, res) => {
     if (parts[2] === 'data') return send(res, 403, 'Forbidden');
     const file = safeJoin(dir, ...parts.slice(2));
     if (!file) return send(res, 403, 'Forbidden');
-    return sendFile(res, file);
+    return sendFile(req, res, file);
+  }
+
+  // /library/<path>: sounds shared by every campaign.
+  if (parts[0] === 'library' && parts.length >= 2) {
+    const file = safeJoin(LIBRARY_DIR, ...parts.slice(1));
+    if (!file) return send(res, 403, 'Forbidden');
+    return sendFile(req, res, file);
   }
 
   // Static app files.
   const rel = parts.length ? parts : ['control.html'];
   const file = safeJoin(PUBLIC_DIR, ...rel);
   if (!file) return send(res, 403, 'Forbidden');
-  sendFile(res, file);
+  sendFile(req, res, file);
 });
 
 server.listen(PORT, '127.0.0.1', () => {

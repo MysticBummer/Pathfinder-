@@ -8,3 +8,7 @@ settings.json
 
 node_modules/
 *.tmp
+
+# Shared sound library: keep the guide, not the sound files.
+library/*
+!library/README.md
