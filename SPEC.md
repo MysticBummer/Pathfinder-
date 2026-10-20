@@ -87,6 +87,31 @@ On a new session, fog is restored but audio and the scene start fresh.
 
 If time runs short before game night, the slideshow is the first thing to cut.
 
+### 4. Generated maps (after game night)
+
+Mainly for live use at the table: the players go somewhere unplanned, the GM types a short description, and a usable battle map is ready in about 15 seconds.
+
+**How it works.** The GM types a description ("forest road, overturned wagon, ravine on the north side"). Claude turns it into a structured layout: walls, rooms, doors, stairs, trees, rocks, water, furniture, and so on, each placed on grid squares. The app then draws that layout itself as clean black-and-white line art. No AI image generation, because image models don't keep walls and features lined up with the grid, and that would break calibration and fog.
+
+**Map types:**
+- Dungeons, caves, and interiors.
+- Buildings such as taverns, temples, manors, and shops, with simple furniture.
+- Outdoor encounters such as clearings, roads, camps, and rivers, with trees, rocks, and water drawn as simple symbols.
+
+Town and region overview maps are out of scope.
+
+**Fixing a result:**
+- **Regenerate:** same description, new attempt.
+- **Tweak by text:** type a change ("add a door on the north wall", "make the river wider") and the current map is revised rather than started over.
+
+No hand editing of walls or features.
+
+**Fitting the table.** By default, generated maps are sized to fit the current map screen at true scale (about 23 x 13 squares on the 27" monitor), so there's no panning mid-fight. A larger size can be picked when the projector is in use.
+
+**At the table.** Generated maps go through stage-then-push like any other map, so the GM checks it before the players see it. Each one is saved into the campaign's `maps/` folder with its layout data, so fog, calibration, and scenes treat it like a normal map, and it can be reused later.
+
+**Needs:** internet and a Claude API key. The key goes in a local settings file that is never committed to git. The cost is a few cents per map at most.
+
 ## Hotkeys (draft)
 
 | Key | Action |
@@ -98,6 +123,7 @@ If time runs short before game night, the slideshow is the first thing to cut.
 | 1-9, 0 | SFX slots |
 | F1-F12 | Load scene |
 | M | Mute all audio |
+| G | Open the map generator |
 
 Final bindings will be configurable.
 
@@ -109,7 +135,8 @@ Final bindings will be configurable.
 - Online or remote play.
 - Phone or tablet remote control.
 - Collage mood boards, handouts, text cards.
+- AI-painted map images, hand editing of generated maps, and town or region maps.
 
 ## Timeline
 
-Next game is 2-4 weeks out. Week 1 maps and fog, week 2 audio, week 3 scenes and slideshow, leaving some slack for a dry run on the real hardware before game night.
+Next game is 2-4 weeks out. Week 1 maps and fog, week 2 audio, week 3 scenes and slideshow, leaving some slack for a dry run on the real hardware before game night. Generated maps come after that, so they can't put the first session at risk.
