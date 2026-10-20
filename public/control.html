@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table Rig</title>
+<link rel="stylesheet" href="control.css">
+</head>
+<body>
+<header>
+  <h1>Table Rig</h1>
+  <label>Campaign <select id="campaign"></select></label>
+  <button id="openMap" title="Open the window that goes on the table screen">Open table screen</button>
+  <span id="tableStatus" class="chip">Table: nothing showing</span>
+  <button id="blackout" class="danger" title="B">Blackout (B)</button>
+</header>
+
+<aside>
+  <section>
+    <h2>Maps</h2>
+    <p class="note" id="mapsEmpty" hidden>No maps yet. Put image files in <code>campaigns/<span id="campName"></span>/maps</code> and click Refresh.</p>
+    <ul id="maps"></ul>
+    <button id="refresh" class="small">Refresh</button>
+  </section>
+
+  <section id="fogSection">
+    <h2>Fog</h2>
+    <div class="row seg">
+      <button data-mode="reveal" class="on" title="X toggles">Reveal</button>
+      <button data-mode="hide" title="X toggles">Re-fog</button>
+    </div>
+    <div class="row seg">
+      <button data-tool="brush" class="on" title="Q">Brush (Q)</button>
+      <button data-tool="box" title="W">Box (W)</button>
+      <button data-tool="view" title="V">Move table (V)</button>
+    </div>
+    <label class="row">Brush <input id="brush" type="range" min="0.5" max="10" step="0.5" value="2"> <span id="brushLabel"></span></label>
+    <div class="row">
+      <button id="undo" class="small" title="Ctrl+Z">Undo (Ctrl+Z)</button>
+      <button id="revealAll" class="small">Reveal all</button>
+      <button id="resetFog" class="small">Fog everything</button>
+    </div>
+  </section>
+
+  <section id="tableSection">
+    <h2>Table view</h2>
+    <label class="row check"><input id="minis" type="checkbox"> Minis down (D)</label>
+    <p class="note" id="minisNote">Map moves in whole squares with the arrow keys, then Space to apply. Players get told which way to slide their minis.</p>
+    <div id="pending" class="pending" hidden></div>
+    <div class="row seg">
+      <button data-zoom="true" class="on">True scale</button>
+      <button data-zoom="fit">Whole map (F)</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Map grid</h2>
+    <p class="note" id="gridInfo"></p>
+    <label class="row">Squares between clicks <input id="calSquares" type="number" min="1" max="50" value="1"></label>
+    <div class="row">
+      <button id="calGrid" class="small">Set grid</button>
+      <button class="small" data-pps="-1">−1</button>
+      <button class="small" data-pps="-0.1">−0.1</button>
+      <button class="small" data-pps="0.1">+0.1</button>
+      <button class="small" data-pps="1">+1</button>
+    </div>
+    <label class="row check"><input id="showGrid" type="checkbox"> Show grid overlay (GM only)</label>
+  </section>
+
+  <section>
+    <h2>Table screen size</h2>
+    <label class="row">Display <select id="display"></select></label>
+    <div class="row">
+      <button id="addDisplay" class="small">New display</button>
+      <button id="renameDisplay" class="small">Rename</button>
+    </div>
+    <label class="row check"><input id="calibrate" type="checkbox"> Show ruler on table</label>
+    <div class="row">
+      <button class="small" data-ppi="-1">−1</button>
+      <button class="small" data-ppi="-0.1">−0.1</button>
+      <input id="ppi" type="number" step="0.1" min="20" max="400">
+      <button class="small" data-ppi="0.1">+0.1</button>
+      <button class="small" data-ppi="1">+1</button>
+    </div>
+    <p class="note">Pixels per inch. Adjust until the ruler on the table matches a real ruler.</p>
+  </section>
+</aside>
+
+<main>
+  <div id="banner"></div>
+  <canvas id="view"></canvas>
+  <div id="help">
+    Left drag: use tool · Right drag: look around · Wheel: zoom ·
+    B blackout · Enter show · X reveal/re-fog · [ ] brush size · Ctrl+Z undo · D minis down · arrows move table · Space apply · Esc cancel
+  </div>
+</main>
+
+<script type="module" src="control.js"></script>
+</body>
+</html>

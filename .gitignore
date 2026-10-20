@@ -1,0 +1,10 @@
+# Your own campaigns and assets stay on your laptop, not in git.
+campaigns/*
+!campaigns/example/
+campaigns/example/data/
+
+# Local settings (display calibration).
+settings.json
+
+node_modules/
+*.tmp
