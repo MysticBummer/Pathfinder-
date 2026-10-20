@@ -1,6 +1,6 @@
 # Table Rig: Spec
 
-A local app for running in-person Pathfinder 1e homebrew games. It handles atmosphere and presentation only: maps, fog of war, sound, and a mood slideshow. Rules, notes, and prep stay on paper.
+A local app for running in-person Pathfinder 1e homebrew games. It handles presentation: maps, fog of war, sound, a mood slideshow, and a visible initiative order. Rules, notes, and prep stay on paper.
 
 Status: agreed spec, nothing built yet.
 
@@ -77,7 +77,7 @@ This is the core feature and it is useful on its own.
 
 Audio source: the GM doesn't have a library yet. Part of this phase is putting together a free starter pack (Creative Commons or royalty free, for example Tabletop Audio and Freesound) and recording the license for each file in a credits file.
 
-### 3. Scenes and mood screen (week 3)
+### 3. Scenes, mood screen, and initiative (week 3)
 
 **Mood screen.** A slow slideshow that crossfades through a set of images. Speed is adjustable. No collages, text, or handouts for now.
 
@@ -85,7 +85,14 @@ Audio source: the GM doesn't have a library yet. Part of this phase is putting t
 
 On a new session, fog is restored but audio and the scene start fresh.
 
-If time runs short before game night, the slideshow is the first thing to cut.
+**Initiative tracker.** Order and turns only. No HP, no conditions; those stay on paper.
+- The party roster is saved, so starting a fight means typing each player's roll, not their name.
+- Enemies are added by name and count ("Goblin x4" becomes Goblin 1 through 4), with one roll each or one shared roll for the group.
+- Sorted automatically. Ties and delays are fixed by dragging.
+- Next-turn hotkey, round counter, and add or remove combatants mid-fight.
+- **Players see it.** During combat the mood screen shows the order as a strip over the slideshow, with the current turn highlighted and the next one marked as on deck. When combat ends, the strip goes away.
+
+If time runs short before game night, the slideshow is the first thing to cut. The initiative tracker stays.
 
 ### 4. Generated maps (after game night)
 
@@ -124,12 +131,14 @@ No hand editing of walls or features.
 | F1-F12 | Load scene |
 | M | Mute all audio |
 | G | Open the map generator |
+| I | Start or end combat (initiative) |
+| N | Next turn |
 
 Final bindings will be configurable.
 
 ## Out of scope
 
-- Rules, character sheets, initiative tracking, campaign notes.
+- Rules, character sheets, HP and condition tracking, campaign notes.
 - Digital tokens (physical minis only).
 - Dynamic lighting and line of sight.
 - Online or remote play.
@@ -139,4 +148,4 @@ Final bindings will be configurable.
 
 ## Timeline
 
-Next game is 2-4 weeks out. Week 1 maps and fog, week 2 audio, week 3 scenes and slideshow, leaving some slack for a dry run on the real hardware before game night. Generated maps come after that, so they can't put the first session at risk.
+Next game is 2-4 weeks out. Week 1 maps and fog, week 2 audio, week 3 scenes, slideshow, and initiative, leaving some slack for a dry run on the real hardware before game night. Generated maps come after that, so they can't put the first session at risk.
